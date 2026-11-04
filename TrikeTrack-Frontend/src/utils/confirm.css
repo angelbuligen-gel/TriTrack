@@ -1,0 +1,131 @@
+/* SweetAlert2 confirmation styling (rendered outside #root) */
+
+.tt-swal {
+  border-radius: 22px !important;
+  padding: 26px 24px 22px !important;
+  border: 1px solid rgba(20, 43, 74, 0.1);
+  box-shadow: 0 28px 70px rgba(20, 43, 74, 0.24) !important;
+  font-family: var(--font, 'Inter', 'Segoe UI', system-ui, sans-serif);
+}
+
+.tt-swal__title {
+  font-size: 1.18rem !important;
+  font-weight: 800 !important;
+  color: #1b2a41 !important;
+  padding: 0 !important;
+}
+
+.tt-swal__body {
+  margin: 14px 0 6px !important;
+  font-size: 0.9rem !important;
+  color: #64748b !important;
+}
+
+.tt-swal-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px 16px;
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #f7f9fc;
+  border: 1px dashed rgba(20, 43, 74, 0.16);
+  text-align: left;
+}
+
+.tt-swal-summary dt {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.tt-swal-summary dd {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1b2a41;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.tt-swal-note {
+  margin: 14px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #718096;
+}
+
+.tt-swal__confirm {
+  margin: 0 6px !important;
+  padding: 11px 20px !important;
+  border-radius: 14px !important;
+  border: 1px solid #e0b02c !important;
+  background: linear-gradient(180deg, #f2c94c 0%, #e0b02c 100%) !important;
+  color: #142b4a !important;
+  font: inherit !important;
+  font-weight: 800 !important;
+  font-size: 0.9rem !important;
+  box-shadow: 0 16px 34px rgba(242, 201, 76, 0.38) !important;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.tt-swal__confirm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 20px 42px rgba(242, 201, 76, 0.46) !important;
+}
+
+.tt-swal__confirm:focus-visible,
+.tt-swal__cancel:focus-visible {
+  outline: 2px solid #285a91 !important;
+  outline-offset: 2px;
+}
+
+.tt-swal__cancel {
+  margin: 0 6px !important;
+  padding: 11px 18px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(20, 43, 74, 0.16) !important;
+  background: #f2f5fa !important;
+  color: #1b2a41 !important;
+  font: inherit !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  transition: background 0.16s ease;
+}
+
+.tt-swal__cancel:hover {
+  background: #e8edf5 !important;
+}
+
+.tt-swal-in {
+  animation: tt-swal-in 0.22s ease;
+}
+
+.tt-swal-out {
+  animation: tt-swal-out 0.16s ease;
+}
+
+@keyframes tt-swal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes tt-swal-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+}
