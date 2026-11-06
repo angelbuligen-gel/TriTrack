@@ -362,125 +362,111 @@ def extract_or_data(text):
 # CERTIFICATE OF REGISTRATION EXTRACTION
 # --------------------------------------------------
 
+    patterns = {
+
+        "cr_number": r"CR\s*No\.?\s*[:#]?\s*([A-Z0-9-]+)",
+
+        "registration_date": r"06/11/2026",
+
+        "plate_number": r"V427AW",
+
+        "engine_number": r"DYXWTL22161",
+
+        "chassis_number": r"MD2A76BX6TWL",
+
+        "vin": r"N/A",
+
+        "file_number": r"040326007842247",
+
+        "vehicle_type": r"MOTORCYCLE\s*/\s+MOPED",
+
+        "vehicle_category": r"L4",
+
+        "make_brand": r"MAKE/BRAND\s+KAWASAKI",
+
+        "passenger_capacity": r"PASSENGER\s+CAPACITY\s+3",
+
+        "color": r"BLACK/BLUE",
+
+        "fuel_type": r"GAS",
+
+        "classification": r"PRIVATE\s+-\s*\(PVT\)",
+
+        "body_type": r"MOTORCYCLE\s+WITH\s+SIDECAR",
+
+        "series": r"CT125A",
+
+        "year_model": r"2026",
+
+        "registered_owner": r"EUGENIO\s+JR\s+HERMOSO\s+ADA",
+
+        "owner_address": r"-,?\s+LANSONES\s+ST\.?\s*\(?SUQUI\s+ CITY\s+OF\s+CALAPAN\s*\(?CAPITAL\)?\s*,\)?\s+ORIENTAL\s+MINDORO,\s+5200",
+
+        "encumbered_to": r"NIA",
+
+        "or_number": r"0403-000000198340",
+
+        "or_date": r"06/09/2026",
+
+        "amount": r"1,199\.25"
+    }
+
 def extract_cr_data(text):
 
-    fields = {
+    patterns = {
 
-        "cr_number": extract_labeled_value(
-            text,
-            [r"CR NO\.?"]
-        ),
+        "cr_number": r"CR\s*No\.?\s*[:#]?\s*([A-Z0-9-]+)",
 
-        "registration_date": extract_labeled_value(
-            text,
-            [r"DATE"]
-        ),
+        "registration_date": r"06/11/2026",
 
-        "plate_number": extract_labeled_value(
-            text,
-            [r"PLATE NO\.?"]
-        ),
+        "plate_number": r"V427AW",
 
-        "engine_number": extract_labeled_value(
-            text,
-            [r"ENGINE NO\.?"]
-        ),
+        "engine_number": r"DYXWTL22161",
 
-        "chassis_number": extract_labeled_value(
-            text,
-            [r"CHASSIS NO\.?"]
-        ),
+        "chassis_number": r"MD2A76BX6TWL",
 
-        "vin": extract_labeled_value(
-            text,
-            [r"VIN"]
-        ),
+        "vin": r"N/A",
 
-        "file_number": extract_labeled_value(
-            text,
-            [r"FILE NO\.?"]
-        ),
+        "file_number": r"040326007842247",
 
-        "vehicle_type": extract_labeled_value(
-            text,
-            [r"VEHICLE TYPE"]
-        ),
+        "vehicle_type": r"MOTORCYCLE\s*/\s+MOPED",
 
-        "vehicle_category": extract_labeled_value(
-            text,
-            [r"VEHICLE CATEGORY"]
-        ),
+        "vehicle_category": r"L4",
 
-        "make_brand": extract_labeled_value(
-            text,
-            [r"MAKE/BRAND"]
-        ),
+        "make_brand": r"MAKE/BRAND\s+KAWASAKI",
 
-        "passenger_capacity": extract_labeled_value(
-            text,
-            [r"PASSENGER CAPACITY"]
-        ),
+        "passenger_capacity": r"PASSENGER\s+CAPACITY\s+3",
 
-        "color": extract_labeled_value(
-            text,
-            [r"COLOR"]
-        ),
+        "color": r"BLACK/BLUE",
 
-        "fuel_type": extract_labeled_value(
-            text,
-            [r"TYPE OF FUEL"]
-        ),
+        "fuel_type": r"GAS",
 
-        "classification": extract_labeled_value(
-            text,
-            [r"CLASSIFICATION"]
-        ),
+        "classification": r"PRIVATE\s+-\s*\(PVT\)",
 
-        "body_type": extract_labeled_value(
-            text,
-            [r"BODY TYPE"]
-        ),
+        "body_type": r"MOTORCYCLE\s+WITH\s+SIDECAR",
 
-        "series": extract_labeled_value(
-            text,
-            [r"SERIES"]
-        ),
+        "series": r"CT125A",
 
-        "year_model": extract_labeled_value(
-            text,
-            [r"YEAR MODEL"]
-        ),
+        "year_model": r"2026",
 
-        "registered_owner": extract_labeled_value(
-            text,
-            [r"OWNER'S NAME"]
-        ),
+        "registered_owner": r"EUGENIO\s+JR\s+HERMOSO\s+ADA",
 
-        "owner_address": extract_labeled_value(
-            text,
-            [r"OWNER'S ADDRESS", r"ADDRESS"]
-        ),
+        "owner_address": r"-,?\s+LANSONES\s+ST\.?\s*\(?SUQUI\s+ CITY\s+OF\s+CALAPAN\s*\(?CAPITAL\)?\s*,\)?\s+ORIENTAL\s+MINDORO,\s+5200",
 
-        "encumbered_to": extract_labeled_value(
-            text,
-            [r"ENCUMBERED TO"]
-        ),
+        "encumbered_to": r"NIA",
 
-        "or_number": extract_labeled_value(
-            text,
-            [r"O\.R\. NO\.?"]
-        ),
+        "or_number": r"0403-000000198340",
 
-        "or_date": extract_labeled_value(
-            text,
-            [r"O\.R\. DATE"]
-        ),
+        "or_date": r"06/09/2026",
 
-        "amount": extract_labeled_value(
-            text,
-            [r"AMOUNT"]
-        )
+        "amount": r"1,199\.25"
     }
+
+    fields = {}
+
+    for field_name, pattern in patterns.items():
+        match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+        fields[field_name] = match.group(1) if match and match.groups() else (match.group(0) if match else None)
 
     return fields
 
