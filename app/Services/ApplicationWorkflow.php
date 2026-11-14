@@ -502,11 +502,10 @@ class ApplicationWorkflow
                 $application,
             );
 
-            $this->notifications->notifyApplication(
+            $this->notifications->notifyApplicationEvent(
                 $application,
-                $approved ? 'Application approved' : 'Application rejected',
-                "{$application->typeLabel()} {$application->reference_number} has been ".($approved ? 'approved' : 'rejected').'.'.($remarks ? " Remarks: {$remarks}" : ''),
-                $approved ? 'success' : 'danger',
+                $approved ? 'application_approved' : 'application_rejected',
+                ['reason' => $remarks ?? ''],
             );
 
             return $application->fresh();
@@ -559,12 +558,20 @@ class ApplicationWorkflow
                 $document,
             );
 
-            $this->notifications->notifyApplication(
-                $application,
-                "Document {$reviewStatus}",
-                "Your uploaded {$document->document_type} was {$reviewStatus}.".($remarks ? " Remarks: {$remarks}" : ''),
-                $reviewStatus === ApplicationDocument::REVIEW_APPROVED ? 'success' : 'warning',
-            );
+            if ($reviewStatus === ApplicationDocument::REVIEW_REJECTED) {
+                $this->notifications->notifyApplicationEvent(
+                    $application,
+                    'documents_missing',
+                    ['reason' => $remarks ?: "Your uploaded {$document->document_type} needs correction."],
+                );
+            } else {
+                $this->notifications->notifyApplication(
+                    $application,
+                    "Document {$reviewStatus}",
+                    "Your uploaded {$document->document_type} was {$reviewStatus}.",
+                    'success',
+                );
+            }
 
             // A rejected document means the franchisee has to act again.
             if ($reviewStatus === ApplicationDocument::REVIEW_REJECTED

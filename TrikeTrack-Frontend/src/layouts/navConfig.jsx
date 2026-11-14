@@ -39,6 +39,7 @@ const NAV_SECTIONS_BY_ROLE = {
       items: [
         { to: '/payments', label: 'Payments' },
         { to: '/documents', label: 'Documents' },
+        { to: '/my-drivers', label: 'Drivers' },
         { to: '/certificates', label: 'Certificates' },
       ],
     },
@@ -74,6 +75,7 @@ const NAV_SECTIONS_BY_ROLE = {
       items: [
         { to: '/certificates', label: 'Certificate Management' },
         { to: '/reports', label: 'Reports' },
+        { to: '/record-reports', label: 'Record Reports' },
       ],
     },
   ],
@@ -95,6 +97,12 @@ const NAV_SECTIONS_BY_ROLE = {
       items: [
         { to: '/users', label: 'User Management' },
         { to: '/settings', label: 'System Configuration' },
+        { to: '/fees', label: 'Fee Management' },
+        { to: '/requirements', label: 'Requirements' },
+        { to: '/templates', label: 'Document Templates' },
+        { to: '/notification-templates', label: 'Notification Templates' },
+        { to: '/backups', label: 'Backup & Maintenance' },
+        { to: '/sessions', label: 'Active Sessions' },
       ],
     },
     { title: 'Monitoring', items: [{ to: '/activity-logs', label: 'Activity Logs' }] },
@@ -109,6 +117,7 @@ export const NAV_ICONS = {
   '/applications': ClipboardList,
   '/payments': CreditCard,
   '/documents': FileText,
+  '/my-drivers': IdCard,
   '/certificates': Certificate,
   '/notifications': Bell,
   '/profile': UserCircle,
@@ -122,6 +131,7 @@ export const NAV_ICONS = {
   '/documents': FileSearch,
   '/certificates': Certificate,
   '/reports': ChartBar,
+  '/record-reports': FileSearch,
   '/treasury': Landmark,
   '/assessments': ReceiptText,
   '/payments': CreditCard,
@@ -129,6 +139,12 @@ export const NAV_ICONS = {
   '/admin': LayoutDashboard,
   '/users': Users,
   '/settings': Cog,
+  '/fees': ReceiptText,
+  '/requirements': ClipboardList,
+  '/templates': FileText,
+  '/notification-templates': Bell,
+  '/backups': History,
+  '/sessions': IdCard,
   '/activity-logs': History,
 }
 

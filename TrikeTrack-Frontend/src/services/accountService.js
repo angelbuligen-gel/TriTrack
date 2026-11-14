@@ -21,7 +21,22 @@ const accountService = {
     markAllRead: () => api.post('/notifications/read-all').then(unwrap),
   },
 
+  franchises: () => api.get('/my/franchise').then(unwrap),
+
+  drivers: {
+    list: async () => {
+      const response = await api.get('/my/drivers')
+
+      return response.data.data ?? []
+    },
+    add: (payload) => api.post('/my/drivers', payload).then(unwrap),
+    update: (id, payload) => api.put(`/my/drivers/${id}`, payload).then(unwrap),
+    archive: (id) => api.delete(`/my/drivers/${id}`).then(unwrap),
+  },
+
   payments: {
+    receipt: (id) =>
+      api.get(`/payments/${id}/receipt`, { responseType: 'blob' }).then((response) => response.data),
     list: async (params) => {
       const response = await api.get('/my/payments', { params })
 

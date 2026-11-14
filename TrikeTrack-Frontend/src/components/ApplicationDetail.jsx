@@ -38,6 +38,7 @@ export default function ApplicationDetail({ application, role, onChanged, onNoti
   const [mlFields, setMlFields] = useState([])
   const [paying, setPaying] = useState(false)
   const [downloading, setDownloading] = useState(false)
+  const [downloadingForm, setDownloadingForm] = useState(false)
 
   const summary = application.summary
   const open = application.is_open
@@ -265,6 +266,20 @@ export default function ApplicationDetail({ application, role, onChanged, onNoti
     }
   }
 
+  const downloadForm = async () => {
+    setDownloadingForm(true)
+    setError('')
+
+    try {
+      const blob = await applicationService.bplo.applicationForm(application.id)
+      saveBlob(blob, `${application.reference_number}-form.pdf`)
+    } catch (exception) {
+      setError(getErrorMessage(exception, 'The application form could not be downloaded.'))
+    } finally {
+      setDownloadingForm(false)
+    }
+  }
+
   const setNoticeMessage = (message) => {
     if (onNotify) {
       onNotify(message)
@@ -321,6 +336,14 @@ export default function ApplicationDetail({ application, role, onChanged, onNoti
           <dd>{formatDate(application.decided_at, { hour: 'numeric', minute: '2-digit' })}</dd>
         </div>
       </dl>
+
+      {isStaff ? (
+        <div className="row-actions">
+          <Button variant="secondary" loading={downloadingForm} onClick={downloadForm}>
+            Download application form
+          </Button>
+        </div>
+      ) : null}
 
       {transfer ? (
         <section className="panel">

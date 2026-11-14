@@ -91,10 +91,33 @@ const applicationService = {
         })
         .then(unwrap),
     certificates: (params) => list('/bplo/certificates', params),
+    applicationForm: (applicationId) =>
+      api
+        .get(`/bplo/applications/${applicationId}/form`, { responseType: 'blob' })
+        .then((response) => response.data),
     issueCertificate: (applicationId) =>
       api.post(`/bplo/applications/${applicationId}/certificate`).then(unwrap),
     reportSummary: (params) => api.get('/bplo/reports/summary', { params }).then(unwrap),
     reportApplications: (params) => list('/bplo/reports/applications', params),
+    recordReport: (report, params) =>
+      api.get(`/bplo/reports/records/${report}`, { params }).then(unwrap),
+    recordReportExport: (report, format, params) =>
+      api
+        .get(`/bplo/reports/records/${report}/export`, {
+          params: { ...params, format },
+          responseType: 'blob',
+        })
+        .then((response) => response.data),
+    sendRenewalReminders: (days) =>
+      api.post('/bplo/reports/renewal-reminders', { days }).then(unwrap),
+    reportApplicationsPdf: (params) =>
+      api
+        .get('/bplo/reports/applications/pdf', { params, responseType: 'blob' })
+        .then((response) => response.data),
+    reportApplicationsExcel: (params) =>
+      api
+        .get('/bplo/reports/applications/excel', { params, responseType: 'blob' })
+        .then((response) => response.data),
   },
 }
 

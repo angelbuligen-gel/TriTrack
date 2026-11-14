@@ -7,6 +7,7 @@ import Modal from '../../components/Modal'
 import PageHeader from '../../components/PageHeader'
 import StatusBadge from '../../components/StatusBadge'
 import accountService from '../../services/accountService'
+import { saveBlob } from '../../services/applicationService'
 import { getErrorMessage } from '../../services/api'
 import { formatDate } from '../../utils/format'
 
@@ -30,6 +31,7 @@ export default function PaymentsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [detail, setDetail] = useState(null)
+  const [receiptLoading, setReceiptLoading] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -56,6 +58,23 @@ export default function PaymentsPage() {
 
     return () => window.clearTimeout(timer)
   }, [load])
+
+  const downloadReceipt = async () => {
+    if (!detail) {
+      return
+    }
+
+    setReceiptLoading(true)
+
+    try {
+      const blob = await accountService.payments.receipt(detail.id)
+      saveBlob(blob, `receipt-${detail.reference_number}.pdf`)
+    } catch (exception) {
+      setError(getErrorMessage(exception, 'The receipt could not be downloaded.'))
+    } finally {
+      setReceiptLoading(false)
+    }
+  }
 
   const totalPaid = rows
     .filter((row) => row.status === 'successful')
@@ -174,9 +193,16 @@ export default function PaymentsPage() {
         title={detail ? `Payment ${detail.reference_number}` : 'Payment'}
         onClose={() => setDetail(null)}
         footer={
-          <Button variant="secondary" onClick={() => setDetail(null)}>
-            Close
-          </Button>
+          <>
+            {detail?.receipt_url ? (
+              <Button variant="secondary" loading={receiptLoading} onClick={downloadReceipt}>
+                Download receipt
+              </Button>
+            ) : null}
+            <Button variant="secondary" onClick={() => setDetail(null)}>
+              Close
+            </Button>
+          </>
         }
       >
         {detail ? (

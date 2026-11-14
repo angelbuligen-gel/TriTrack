@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'driver_id',
     'assigned_from',
     'assigned_until',
+    'assigned_date',
+    'end_date',
     'is_primary',
     'assignment_status',
 ])]
@@ -23,21 +25,19 @@ class FranchiseDriver extends Model
         return [
             'assigned_from' => 'date',
             'assigned_until' => 'date',
+            'assigned_date' => 'date',
+            'end_date' => 'date',
             'is_primary' => 'boolean',
         ];
     }
 
-    /**
-     * @return BelongsTo<Franchise, $this>
-     */
+    /** @return BelongsTo<Franchise, $this> */
     public function franchise(): BelongsTo
     {
         return $this->belongsTo(Franchise::class);
     }
 
-    /**
-     * @return BelongsTo<Driver, $this>
-     */
+    /** @return BelongsTo<Driver, $this> */
     public function driver(): BelongsTo
     {
         return $this->belongsTo(Driver::class);

@@ -15,6 +15,8 @@ class OtpService
 {
     public const PURPOSE_PHONE_VERIFICATION = 'phone_verification';
 
+    public const PURPOSE_PASSWORD_RESET = 'password_reset';
+
     public function __construct(
         private readonly SmsSender $sms,
         private readonly Hasher $hasher,

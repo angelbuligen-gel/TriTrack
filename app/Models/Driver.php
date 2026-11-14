@@ -18,6 +18,10 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
     'license_expiry',
     'contact_number',
     'address',
+    'sitio_street',
+    'barangay',
+    'city',
+    'province',
 ])]
 class Driver extends Model
 {
@@ -30,19 +34,13 @@ class Driver extends Model
         ];
     }
 
-    /**
-     * @return HasMany<FranchiseDriver, $this>
-     */
+    /** @return HasMany<FranchiseDriver, $this> */
     public function franchiseAssignments(): HasMany
     {
         return $this->hasMany(FranchiseDriver::class)->orderByDesc('assigned_from');
     }
 
-    /**
-     * Franchises this driver is currently assigned to.
-     *
-     * @return HasManyThrough<Franchise, FranchiseDriver, $this>
-     */
+    /** @return HasManyThrough<Franchise, FranchiseDriver, $this> */
     public function currentFranchises(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -51,14 +49,11 @@ class Driver extends Model
             'driver_id',
             'id',
             'id',
-            'franchise_id',
+            'franchise_id'
         )->where('franchise_drivers.assignment_status', 'active');
     }
 
-    /**
-     * @param  Builder<Driver>  $query
-     * @return Builder<Driver>
-     */
+    /** @param Builder<Driver> $query */
     public function scopeSearch(Builder $query, ?string $keyword): Builder
     {
         if (blank($keyword)) {

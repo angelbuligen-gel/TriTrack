@@ -94,6 +94,10 @@ export default function LoginPage() {
           required
         />
 
+        <p className="field__hint" style={{ textAlign: 'right' }}>
+          <Link to="/forgot-password">Forgot password?</Link>
+        </p>
+
         <Button type="submit" variant="secondary" block loading={submitting}>
           {submitting ? 'Signing in…' : 'Sign in'}
         </Button>

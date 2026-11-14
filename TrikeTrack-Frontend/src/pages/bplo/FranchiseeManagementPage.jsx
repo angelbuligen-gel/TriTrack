@@ -9,6 +9,7 @@ import SelectField from '../../components/SelectField'
 import StatusBadge from '../../components/StatusBadge'
 import TextField from '../../components/TextField'
 import recordService from '../../services/recordService'
+import api from '../../services/api'
 import { getErrorMessage, getFieldErrors } from '../../services/api'
 import { confirmCreate } from '../../utils/confirm'
 
@@ -30,6 +31,33 @@ export default function FranchiseeManagementPage() {
   const [selectedAccount, setSelectedAccount] = useState('')
   const [linkError, setLinkError] = useState('')
   const [linking, setLinking] = useState(false)
+
+  const [notifyTarget, setNotifyTarget] = useState(null)
+  const [notifyForm, setNotifyForm] = useState({ title: '', message: '', type: 'info' })
+  const [notifyError, setNotifyError] = useState('')
+  const [notifying, setNotifying] = useState(false)
+
+  const openNotify = (row) => {
+    setNotifyTarget(row)
+    setNotifyForm({ title: '', message: '', type: 'info' })
+    setNotifyError('')
+  }
+
+  const sendNotification = async (event) => {
+    event.preventDefault()
+    setNotifying(true)
+    setNotifyError('')
+
+    try {
+      await api.post(`/bplo/franchisees/${notifyTarget.id}/notifications`, notifyForm)
+      setNotice(`Notification sent to ${notifyTarget.full_name}.`)
+      setNotifyTarget(null)
+    } catch (error) {
+      setNotifyError(getErrorMessage(error, 'The notification could not be sent.'))
+    } finally {
+      setNotifying(false)
+    }
+  }
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -245,6 +273,11 @@ export default function FranchiseeManagementPage() {
                     Edit
                   </Button>
                   {row.linked_account ? (
+                    <Button variant="secondary" onClick={() => openNotify(row)}>
+                      Notify
+                    </Button>
+                  ) : null}
+                  {row.linked_account ? (
                     <Button variant="ghost-dark" onClick={() => handleUnlink(row)}>
                       Unlink
                     </Button>
@@ -298,6 +331,67 @@ export default function FranchiseeManagementPage() {
           </div>
           <TextField id="province" name="province" label="Province" value={form.province ?? ''} onChange={handleChange} error={fieldErrors.province} />
         </form>
+      </Modal>
+
+      <Modal
+        open={Boolean(notifyTarget)}
+        title={notifyTarget ? `Notify ${notifyTarget.full_name}` : 'Send notification'}
+        onClose={() => setNotifyTarget(null)}
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setNotifyTarget(null)} disabled={notifying}>
+              Cancel
+            </Button>
+            <Button onClick={sendNotification} loading={notifying}>
+              Send notification
+            </Button>
+          </>
+        }
+      >
+        {notifyError ? <Alert variant="error">{notifyError}</Alert> : null}
+
+        <div className="form-grid">
+          <label className="field">
+            <span className="field__label">Title</span>
+            <input
+              className="field__input"
+              value={notifyForm.title}
+              onChange={(event) =>
+                setNotifyForm((current) => ({ ...current, title: event.target.value }))
+              }
+              required
+            />
+          </label>
+
+          <label className="field">
+            <span className="field__label">Tone</span>
+            <select
+              className="field__input"
+              value={notifyForm.type}
+              onChange={(event) =>
+                setNotifyForm((current) => ({ ...current, type: event.target.value }))
+              }
+            >
+              <option value="info">Information</option>
+              <option value="success">Success</option>
+              <option value="warning">Warning</option>
+              <option value="error">Alert</option>
+            </select>
+          </label>
+
+          <label className="field field--span-2">
+            <span className="field__label">Message</span>
+            <textarea
+              className="field__input field__input--textarea"
+              rows={4}
+              value={notifyForm.message}
+              onChange={(event) =>
+                setNotifyForm((current) => ({ ...current, message: event.target.value }))
+              }
+              required
+            />
+          </label>
+        </div>
       </Modal>
 
       <Modal

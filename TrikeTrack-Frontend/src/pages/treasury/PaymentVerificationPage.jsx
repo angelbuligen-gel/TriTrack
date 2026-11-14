@@ -7,6 +7,7 @@ import Modal from '../../components/Modal'
 import PageHeader from '../../components/PageHeader'
 import StatusBadge from '../../components/StatusBadge'
 import treasuryService from '../../services/treasuryService'
+import { saveBlob } from '../../services/applicationService'
 import { getErrorMessage, getFieldErrors } from '../../services/api'
 import { formatDate, humanizeStatus } from '../../utils/format'
 
@@ -48,6 +49,7 @@ export default function PaymentVerificationPage() {
     remarks: '',
   })
   const [verifying, setVerifying] = useState(false)
+  const [receiptLoading, setReceiptLoading] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -94,6 +96,24 @@ export default function PaymentVerificationPage() {
       setError(getErrorMessage(exception, 'The payment could not be loaded.'))
     } finally {
       setDetailLoading(false)
+    }
+  }
+
+  const downloadReceipt = async () => {
+    if (!detail) {
+      return
+    }
+
+    setReceiptLoading(true)
+    setError('')
+
+    try {
+      const blob = await treasuryService.payments.receipt(detail.id)
+      saveBlob(blob, `receipt-${detail.reference_number}.pdf`)
+    } catch (exception) {
+      setError(getErrorMessage(exception, 'The receipt could not be downloaded.'))
+    } finally {
+      setReceiptLoading(false)
     }
   }
 
@@ -242,9 +262,16 @@ export default function PaymentVerificationPage() {
         title={detail ? `Payment ${detail.reference_number}` : 'Payment'}
         onClose={() => setDetail(null)}
         footer={
-          <Button variant="secondary" onClick={() => setDetail(null)}>
-            Close
-          </Button>
+          <>
+            {detail?.receipt_url ? (
+              <Button variant="secondary" loading={receiptLoading} onClick={downloadReceipt}>
+                Download receipt
+              </Button>
+            ) : null}
+            <Button variant="secondary" onClick={() => setDetail(null)}>
+              Close
+            </Button>
+          </>
         }
       >
         {detailLoading && !detail ? <p className="empty-state">Loading payment...</p> : null}

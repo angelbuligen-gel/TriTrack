@@ -5,8 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 #[Fillable([
@@ -17,8 +17,9 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
     'suffix',
     'birth_date',
     'address',
+    'sitio_street',
     'barangay',
-    'city_municipality',
+    'city',
     'province',
     'contact_number',
 ])]
@@ -33,25 +34,19 @@ class Franchisee extends Model
         ];
     }
 
-    /**
-     * @return BelongsTo<User, $this>
-     */
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * @return HasMany<Franchise, $this>
-     */
+    /** @return HasMany<Franchise, $this> */
     public function franchises(): HasMany
     {
         return $this->hasMany(Franchise::class);
     }
 
-    /**
-     * @return HasManyThrough<Driver, Franchise, $this>
-     */
+    /** @return HasMany<Driver, Franchise, $this> */
     public function drivers(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -60,13 +55,11 @@ class Franchisee extends Model
             'franchisee_id',
             'id',
             'id',
-            'driver_id',
+            'driver_id'
         );
     }
 
-    /**
-     * @return HasManyThrough<Vehicle, Franchise, $this>
-     */
+    /** @return HasMany<Vehicle, Franchise, $this> */
     public function vehicles(): HasManyThrough
     {
         return $this->hasManyThrough(
@@ -75,16 +68,26 @@ class Franchisee extends Model
             'franchisee_id',
             'id',
             'id',
-            'vehicle_id',
+            'vehicle_id'
         );
     }
 
-    /**
-     * @return HasMany<Application, $this>
-     */
+    /** @return HasMany<Application, $this> */
     public function applications(): HasMany
     {
         return $this->hasMany(Application::class)->orderByDesc('id');
+    }
+
+    /** @return HasMany<FranchiseeHistory, $this> */
+    public function previousFranchiseeHistories(): HasMany
+    {
+        return $this->hasMany(FranchiseeHistory::class, 'previous_franchisee_id', 'franchisee_id');
+    }
+
+    /** @return HasMany<FranchiseeHistory, $this> */
+    public function newFranchiseeHistories(): HasMany
+    {
+        return $this->hasMany(FranchiseeHistory::class, 'new_franchisee_id', 'franchisee_id');
     }
 
     public function getFullNameAttribute(): string

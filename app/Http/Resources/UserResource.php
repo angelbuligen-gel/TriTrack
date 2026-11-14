@@ -28,6 +28,7 @@ class UserResource extends JsonResource
             'role' => $this->role,
             'account_status' => $this->account_status,
             'can_transact' => $this->canTransact(),
+            'last_login_at' => $this->last_login_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

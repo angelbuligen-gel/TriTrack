@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Exceptions\WorkflowException;
 use App\Models\Application;
 use App\Models\Certificate;
+use App\Models\DocumentTemplate;
+use App\Models\SystemSetting;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -57,11 +59,10 @@ class CertificateService
                 $certificate,
             );
 
-            $this->notifications->notifyApplication(
+            $this->notifications->notifyApplicationEvent(
                 $application,
-                'Certificate ready',
-                "Certificate {$certificate->certificate_number} for {$application->reference_number} is ready for download.",
-                'success',
+                'certificate_ready',
+                ['certificate_number' => $certificate->certificate_number],
             );
 
             return $certificate->fresh(['application.franchisee', 'application.franchise', 'issuedBy']);
@@ -80,11 +81,33 @@ class CertificateService
         $franchisee = $application->franchisee;
         $change = $application->vehicleChange;
 
+        $template = DocumentTemplate::for(DocumentTemplate::certificateTypeFor($application->application_type));
+
+        $vehicleLabel = trim(implode(' · ', array_filter([
+            $change?->proposed_plate_number ?? $franchise?->activeVehicle?->plate_number,
+            ($change?->proposed_motor_number ?? $franchise?->activeVehicle?->motor_number)
+                ? 'Motor No. '.($change?->proposed_motor_number ?? $franchise?->activeVehicle?->motor_number)
+                : null,
+        ])));
+
         return [
             'certificate' => $certificate,
             'application' => $application,
             'franchise' => $franchise,
             'franchisee' => $franchisee,
+            'template' => $template,
+            'statementVars' => [
+                'franchisee' => $franchisee?->full_name,
+                'franchise_number' => $franchise?->franchise_number,
+                'application_reference' => $application->reference_number,
+                'certificate_number' => $certificate->certificate_number,
+                'vehicle' => $vehicleLabel,
+                'date_issued' => CarbonImmutable::parse($certificate->issued_at)->format($template?->date_format ?: 'F j, Y'),
+                'valid_from' => CarbonImmutable::parse($certificate->issued_at)->format($template?->date_format ?: 'F j, Y'),
+                'valid_until' => $this->validUntil($application) ?? 'Until revoked',
+                'office' => SystemSetting::query()->where('key', 'office_name')->value('value')
+                    ?? 'Business Permits and Licensing Office',
+            ],
             'vehicle' => [
                 'plate_number' => $change?->proposed_plate_number ?? $franchise?->activeVehicle?->plate_number,
                 'motor_number' => $change?->proposed_motor_number ?? $franchise?->activeVehicle?->motor_number,

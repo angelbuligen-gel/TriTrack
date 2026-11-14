@@ -35,6 +35,7 @@ class PaymentResource extends JsonResource
             'verified_by' => $this->whenLoaded('verifiedBy', fn () => $this->verifiedBy?->name),
             'verified_at' => $this->verified_at?->toIso8601String(),
             'failure_reason' => $this->failure_reason,
+            'receipt_url' => $this->isSuccessful() ? '/api/payments/'.$this->id.'/receipt' : null,
             'events' => PaymentEventResource::collection($this->whenLoaded('events')),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),

@@ -129,12 +129,20 @@ class PaymentService
             $payment,
         );
 
-        $this->notifications->notifyApplication(
-            $payment->application,
-            $status === Payment::STATUS_SUCCESSFUL ? 'Payment confirmed' : 'Payment not confirmed',
-            "Payment {$payment->reference_number} was marked {$status}.".($remarks ? " Remarks: {$remarks}" : ''),
-            $status === Payment::STATUS_SUCCESSFUL ? 'success' : 'warning',
-        );
+        if ($status === Payment::STATUS_SUCCESSFUL) {
+            $this->notifications->notifyApplicationEvent(
+                $payment->application,
+                'payment_confirmed',
+                ['amount' => number_format((float) $payment->amount, 2)],
+            );
+        } else {
+            $this->notifications->notifyApplication(
+                $payment->application,
+                'Payment not confirmed',
+                "Payment {$payment->reference_number} was marked {$status}.".($remarks ? " Remarks: {$remarks}" : ''),
+                'warning',
+            );
+        }
 
         return $payment->fresh()->load(['assessment.items', 'application', 'verifiedBy']);
     }

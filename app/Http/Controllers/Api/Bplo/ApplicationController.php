@@ -8,11 +8,14 @@ use App\Http\Requests\ApplicationRemarksRequest;
 use App\Http\Resources\ApplicationResource;
 use App\Models\Application;
 use App\Models\ApplicationDocument;
+use App\Services\ApplicationFormService;
 use App\Services\ApplicationWorkflow;
 use App\Support\ApiResponse;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class ApplicationController extends Controller
 {
@@ -151,6 +154,16 @@ class ApplicationController extends Controller
             new ApplicationResource($application->load(['franchise', 'franchisee', 'documents', 'statusLogs.performedBy'])),
             'Correction request sent to the franchisee.',
         );
+    }
+
+    /**
+     * Printable application form, rendered from the active template.
+     */
+    public function form(Application $application, ApplicationFormService $forms): Response
+    {
+        return Pdf::loadView('documents.form', $forms->pdfData($application))
+            ->setPaper('a4', 'portrait')
+            ->download("{$application->reference_number}-form.pdf");
     }
 
     public function decide(ApplicationDecisionRequest $request, Application $application): JsonResponse

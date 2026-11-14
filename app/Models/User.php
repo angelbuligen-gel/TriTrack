@@ -52,50 +52,34 @@ class User extends Authenticatable
 
     protected $table = 'users';
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'phone_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-
-    /**
-     * @return HasMany<OtpVerification, $this>
-     */
+    /** @return HasMany<OtpVerification, $this> */
     public function otpVerifications(): HasMany
     {
         return $this->hasMany(OtpVerification::class);
     }
 
-    /**
-     * @return HasOne<Franchisee, $this>
-     */
+    /** @return HasOne<Franchisee, $this> */
     public function franchiseeProfile(): HasOne
     {
         return $this->hasOne(Franchisee::class);
     }
 
-    /**
-     * @return HasMany<UserNotification, $this>
-     */
+    /** @return HasMany<UserNotification, $this> */
     public function appNotifications(): HasMany
     {
         return $this->hasMany(UserNotification::class)->orderByDesc('id');
     }
 
-    /**
-     * @return HasMany<ActivityLog, $this>
-     */
+    /** @return HasMany<ActivityLog, $this> */
     public function activityLogs(): HasMany
     {
         return $this->hasMany(ActivityLog::class)->orderByDesc('id');
+    }
+
+    /** @return HasMany<FranchiseeHistory, $this> */
+    public function franchiseeHistories(): HasMany
+    {
+        return $this->hasMany(FranchiseeHistory::class, 'approved_by', 'id');
     }
 
     public function hasRole(string ...$roles): bool
@@ -121,8 +105,7 @@ class User extends Authenticatable
         ], true);
     }
 
-    /**
-     * Franchise transactions require a verified number and an
+    /** Franchise transactions require a verified number and an
      * administrator-activated account.
      */
     public function canTransact(): bool

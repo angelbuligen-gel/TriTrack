@@ -79,11 +79,10 @@ class AssessmentService
                 $assessment,
             );
 
-            $this->notifications->notifyApplication(
+            $this->notifications->notifyApplicationEvent(
                 $application,
-                'Fees assessed',
-                "Your {$application->typeLabel()} has an assessed total of ₱".number_format((float) $assessment->total_amount, 2).'. You may now pay online.',
-                'info',
+                'payment_instructions',
+                ['amount' => number_format((float) $assessment->total_amount, 2)],
             );
 
             return $assessment->fresh()->load('items.feeType');

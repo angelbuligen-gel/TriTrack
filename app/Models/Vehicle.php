@@ -7,19 +7,19 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
+    'make_brand',
     'or_number',
     'cr_number',
     'motor_number',
     'chassis_number',
     'plate_number',
-    'make',
-    'model',
-    'year_model',
+    'or_year',
     'color',
     'vehicle_status',
+    'vehicle_id',
 ])]
 class Vehicle extends Model
 {
@@ -43,35 +43,33 @@ class Vehicle extends Model
         self::STATUS_REJECTED,
     ];
 
-    /**
-     * @return HasMany<FranchiseVehicle, $this>
-     */
+    /** @return HasOne<Franchise, $this> */
+    public function franchise(): HasOne
+    {
+        return $this->hasOne(Franchise::class, 'vehicle_id', 'id');
+    }
+
+    /** @return HasMany<FranchiseVehicle, $this> */
     public function franchiseAssignments(): HasMany
     {
         return $this->hasMany(FranchiseVehicle::class)->orderByDesc('assigned_from');
     }
 
-    /**
-     * Franchises this vehicle is currently assigned to.
-     *
-     * @return HasManyThrough<Franchise, FranchiseVehicle, $this>
-     */
-    public function currentFranchises(): HasManyThrough
+    /** @return HasMany<VehicleHistory, $this> */
+    public function vehicleHistory(): HasMany
     {
-        return $this->hasManyThrough(
-            Franchise::class,
-            FranchiseVehicle::class,
-            'vehicle_id',
-            'id',
-            'id',
-            'franchise_id',
-        )->where('franchise_vehicles.assignment_status', 'active');
+        return $this->hasMany(VehicleHistory::class, 'vehicle_id', 'id');
     }
 
-    /**
-     * @param  Builder<Vehicle>  $query
-     * @return Builder<Vehicle>
-     */
+    /** @return HasMany<VehicleHistory, $this> */
+    public function currentFranchiseAssignments(): HasMany
+    {
+        return $this->hasMany(FranchiseVehicle::class)
+            ->where('assignment_status', 'active')
+            ->orderByDesc('assigned_from');
+    }
+
+    /** @param Builder<Vehicle> $query */
     public function scopeSearch(Builder $query, ?string $keyword): Builder
     {
         if (blank($keyword)) {
@@ -83,11 +81,11 @@ class Vehicle extends Model
             ->orWhere('motor_number', 'like', "%{$keyword}%")
             ->orWhere('chassis_number', 'like', "%{$keyword}%")
             ->orWhere('or_number', 'like', "%{$keyword}%")
-            ->orWhere('make', 'like', "%{$keyword}%");
+            ->orWhere('make_brand', 'like', "%{$keyword}%");
     }
 
     public function getDisplayAttribute(): string
     {
-        return trim(sprintf('%s %s %s', $this->make, $this->model, $this->plate_number));
+        return trim(sprintf('%s %s %s', $this->make_brand, $this->model, $this->plate_number));
     }
 }

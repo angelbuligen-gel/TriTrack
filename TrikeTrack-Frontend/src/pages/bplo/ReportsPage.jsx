@@ -55,28 +55,21 @@ export default function ReportsPage() {
     load()
   }, [load])
 
-  const exportCsv = async () => {
+  const exportFile = async (kind) => {
     setError('')
 
     try {
-      const result = await applicationService.bplo.reportApplications({
-        ...filters,
-        per_page: 200,
-      })
-
-      const header = ['Reference', 'Type', 'Franchise', 'Franchisee', 'Status', 'Submitted', 'Decided', 'Decided by']
-      const lines = result.items.map((row) =>
-        [row.reference_number, row.type, row.franchise_number, row.franchisee, row.status, row.submitted_at, row.decided_at, row.decided_by]
-          .map((cell) => `"${String(cell ?? '').replaceAll('"', '""')}"`)
-          .join(','),
-      )
+      const blob =
+        kind === 'pdf'
+          ? await applicationService.bplo.reportApplicationsPdf(filters)
+          : await applicationService.bplo.reportApplicationsExcel(filters)
 
       saveBlob(
-        new Blob([[header.join(','), ...lines].join('\n')], { type: 'text/csv;charset=utf-8' }),
-        `bplo-applications-${filters.from}-to-${filters.to}.csv`,
+        blob,
+        `bplo-applications-${filters.from}-to-${filters.to}.${kind === 'pdf' ? 'pdf' : 'xls'}`,
       )
     } catch (exception) {
-      setError(getErrorMessage(exception, 'The CSV export could not be generated.'))
+      setError(getErrorMessage(exception, 'The export could not be generated.'))
     }
   }
 
@@ -87,9 +80,14 @@ export default function ReportsPage() {
         title="BPLO operations report"
         text="Application volume, franchise status, certificate issuance, and collections for the selected period."
         actions={
-          <Button variant="secondary" onClick={exportCsv}>
-            Export applications CSV
-          </Button>
+          <div className="row-actions">
+            <Button variant="secondary" onClick={() => exportFile('pdf')}>
+              Export PDF
+            </Button>
+            <Button variant="secondary" onClick={() => exportFile('excel')}>
+              Export Excel
+            </Button>
+          </div>
         }
       />
 

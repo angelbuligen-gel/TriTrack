@@ -179,8 +179,12 @@ class AuthController extends Controller
 
         RateLimiter::clear($throttleKey);
 
+        $user->forceFill(['last_login_at' => now()])->save();
+
+        $device = $request->string('device_name')->toString() ?: 'tritrack-web';
+
         $token = $user->createToken(
-            $request->string('device_name')->toString() ?: 'tritrack-web',
+            $device.($request->ip() ? ' · '.$request->ip() : ''),
             ['*'],
         );
 
@@ -189,6 +193,72 @@ class AuthController extends Controller
             'token_type' => 'Bearer',
             'user' => new UserResource($user),
         ], 'Signed in successfully.');
+    }
+
+    /**
+     * Start a password reset. The response is deliberately generic so an
+     * attacker cannot use this endpoint to discover registered accounts.
+     */
+    public function forgotPassword(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'identifier' => ['required', 'string', 'max:190'],
+        ]);
+
+        $user = $this->findByIdentifier($validated['identifier']);
+
+        $notice = 'If the account exists, a reset code has been sent to its registered mobile number.';
+
+        if ($user === null || blank($user->mobile_number)) {
+            return ApiResponse::success(['sent' => true], $notice);
+        }
+
+        try {
+            $this->otp->issue($user, $request->ip(), OtpService::PURPOSE_PASSWORD_RESET);
+        } catch (OtpException $e) {
+            return ApiResponse::error($e->getMessage(), $this->otpErrors($e), $e->status);
+        } catch (SmsDeliveryException $e) {
+            return ApiResponse::error($e->getMessage(), [], 502);
+        }
+
+        return ApiResponse::success(['sent' => true], $notice);
+    }
+
+    /**
+     * Finish a password reset with the OTP sent to the account's mobile.
+     * Every existing session is revoked afterwards.
+     */
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'identifier' => ['required', 'string', 'max:190'],
+            'otp' => ['required', 'digits:6'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = $this->findByIdentifier($validated['identifier']);
+
+        if ($user === null) {
+            return ApiResponse::error(
+                'The reset code is invalid or has expired.',
+                ['otp' => ['The reset code is invalid or has expired.']],
+                422,
+            );
+        }
+
+        try {
+            $this->otp->verify($user, $validated['otp'], OtpService::PURPOSE_PASSWORD_RESET);
+        } catch (OtpException $e) {
+            return ApiResponse::error($e->getMessage(), $this->otpErrors($e), $e->status);
+        }
+
+        $user->forceFill(['password' => $validated['password']])->save();
+        $user->tokens()->delete();
+
+        return ApiResponse::success(
+            ['reset' => true],
+            'Your password has been reset. Sign in with the new password.',
+        );
     }
 
     public function logout(Request $request): JsonResponse

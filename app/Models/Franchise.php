@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 #[Fillable([
     'franchisee_id',
@@ -17,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\HasOneThrough;
     'expiration_date',
     'franchise_status',
     'remarks',
+    'renewal_reminder_sent_at',
+    'vehicle_id',
 ])]
 class Franchise extends Model
 {
@@ -48,84 +49,71 @@ class Franchise extends Model
         return [
             'date_issued' => 'date',
             'expiration_date' => 'date',
+            'renewal_reminder_sent_at' => 'datetime',
         ];
     }
 
-    /**
-     * @return BelongsTo<Franchisee, $this>
-     */
+    /** @return BelongsTo<Franchisee, $this> */
     public function franchisee(): BelongsTo
     {
         return $this->belongsTo(Franchisee::class);
     }
 
-    /**
-     * The motor currently assigned to this franchise.
-     *
-     * @return HasOneThrough<Vehicle, FranchiseVehicle, $this>
-     */
-    public function activeVehicle(): HasOneThrough
+    /** @return BelongsTo<Vehicle, $this> */
+    public function activeVehicle(): BelongsTo
     {
-        return $this->hasOneThrough(
-            Vehicle::class,
-            FranchiseVehicle::class,
-            'franchise_id',
-            'id',
-            'id',
-            'vehicle_id',
-        )->where('franchise_vehicles.assignment_status', 'active');
+        return $this->belongsTo(Vehicle::class, 'vehicle_id', 'id');
     }
 
-    /**
-     * Active driver assignments for this franchise.
-     *
-     * @return HasMany<FranchiseDriver, $this>
-     */
+    /** @return HasMany<FranchiseeHistory, $this> */
+    public function franchiseeHistory(): HasMany
+    {
+        return $this->hasMany(FranchiseeHistory::class);
+    }
+
+    /** @return HasMany<FranchiseeHistory, $this> */
+    public function previousFranchiseeHistory(): HasMany
+    {
+        return $this->hasMany(FranchiseeHistory::class, 'previous_franchisee_id', 'franchisee_id');
+    }
+
+    /** @return HasMany<FranchiseeHistory, $this> */
+    public function newFranchiseeHistory(): HasMany
+    {
+        return $this->hasMany(FranchiseeHistory::class, 'new_franchisee_id', 'franchisee_id');
+    }
+
+    /** @return HasMany<FranchiseDriver, $this> */
     public function driverAssignments(): HasMany
     {
         return $this->hasMany(FranchiseDriver::class)->where('assignment_status', 'active');
     }
 
-    /**
-     * Active vehicle assignments for this franchise.
-     *
-     * @return HasMany<FranchiseVehicle, $this>
-     */
+    /** @return HasMany<FranchiseVehicle, $this> */
     public function vehicleAssignments(): HasMany
     {
         return $this->hasMany(FranchiseVehicle::class)->where('assignment_status', 'active');
     }
 
-    /**
-     * @return HasMany<FranchiseDriver, $this>
-     */
+    /** @return HasMany<FranchiseDriver, $this> */
     public function driverHistory(): HasMany
     {
         return $this->hasMany(FranchiseDriver::class)->orderByDesc('assigned_from');
     }
 
-    /**
-     * @return HasMany<FranchiseVehicle, $this>
-     */
+    /** @return HasMany<FranchiseVehicle, $this> */
     public function vehicleHistory(): HasMany
     {
         return $this->hasMany(FranchiseVehicle::class)->orderByDesc('assigned_from');
     }
 
-    /**
-     * Renewal, transfer, and change motor applications filed for this franchise.
-     *
-     * @return HasMany<Application, $this>
-     */
+    /** @return HasMany<Application, $this> */
     public function applications(): HasMany
     {
         return $this->hasMany(Application::class)->orderByDesc('id');
     }
 
-    /**
-     * @param  Builder<Franchise>  $query
-     * @return Builder<Franchise>
-     */
+    /** @param Builder<Franchise> $query */
     public function scopeSearch(Builder $query, ?string $keyword): Builder
     {
         if (blank($keyword)) {

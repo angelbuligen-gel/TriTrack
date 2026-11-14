@@ -33,7 +33,17 @@ const treasuryService = {
     list: (params) => list('/treasury/payments', params),
     get: (id) => api.get(`/treasury/payments/${id}`).then(unwrap),
     verify: (id, payload) => api.post(`/treasury/payments/${id}/verify`, payload).then(unwrap),
+    receipt: (id) =>
+      api.get(`/payments/${id}/receipt`, { responseType: 'blob' }).then((response) => response.data),
     report: (params) => api.get('/treasury/reports/collections', { params }).then(unwrap),
+    reportPdf: (params) =>
+      api
+        .get('/treasury/reports/collections/pdf', { params, responseType: 'blob' })
+        .then((response) => response.data),
+    reportExcel: (params) =>
+      api
+        .get('/treasury/reports/collections/excel', { params, responseType: 'blob' })
+        .then((response) => response.data),
   },
 }
 

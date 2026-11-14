@@ -16,10 +16,12 @@ A web-based franchise processing system for a Local Government Office in Orienta
 | Franchise / franchisee / driver / vehicle records | Done |
 | Franchise renewal applications + BPLO review | Done |
 | Document upload with permanent submission history | Done |
-| Transfer, change motor applications | Planned (schema and workflow already support them) |
-| ML extraction of uploaded documents | Planned |
-| Fee assessment, online payments, treasury verification | Planned |
-| Certificate generation, reports, administration | Planned |
+| Transfer, change motor applications | Done |
+| ML extraction of uploaded documents | Done |
+| Fee assessment, online payments, treasury verification | Done |
+| Certificate generation, reports, administration | Done |
+| Password reset via SMS OTP, payment receipts, session management | Done |
+| Franchisee driver management, BPLO-to-franchisee notifications | Done |
 
 Details: [`docs/module-01-auth-and-otp.md`](docs/module-01-auth-and-otp.md),
 [`docs/module-02-franchise-records.md`](docs/module-02-franchise-records.md),
